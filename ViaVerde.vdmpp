@@ -1,28 +1,58 @@
 class ViaVerde
 
   types
-  	public Nome = seq1 of char
+  	public Nome = seq1 of char;
+  	
     -- public clientes = Cliente;
   values
     
 	instance variables
-	  private clientes : set of Cliente := {};
+	  private clients : set of Client := {};
+	  private service_providers : set of ServiceProvider := {};
+  
+  
+  --operations
   operations
   
-  public addCliente(nome_do_cliente: Nome)  ==
+  --adiciona um cliente
+  public addClient(cliente: Client) ==
   (
-      dcl novo : Cliente;
-      novo := new Cliente(nome_do_cliente);
-      addCliente(novo);
-  );
-  
-    public addCliente(cliente: Cliente) ==
-  (
-    clientes := clientes union {cliente};
-    IO`println(clientes);
+    clients := clients union {cliente};
+    IO`println(clients);
   )
     post 
-     	clientes <> {};
+     	clients <> {};
+  
+  --remove um cliente   	
+  public removeClient(cliente: Client) == 
+  ( 	
+  	--IO`println(cliente.name);
+  	--clientes := clientes \ {cliente};
+  	--percorrer o set e comparar o nome
+  	dcl c1 : Client;
+  	c1 := iota c in set clients & c.id = cliente.id;
+  	
+		clients := clients \ {c1};
+		
+		IO`println(clients);
+  );
+	
+	--adiciona uma parceria com um fornecedor de servicos (parque estacionamento, auto-estradas, etc.)
+	public addServiceProvider(provider: ServiceProvider) == (
+		service_providers := service_providers union {provider};
+    IO`println(service_providers);
+	);
+	
+	--remove uma parceria com um fornecedor de servicos
+	public removeServiceProvider(provider: ServiceProvider) == 
+  ( 	
+  	dcl sp1 : ServiceProvider;
+  	sp1 := iota sp in set service_providers & sp.id = provider.id;
+  	
+		service_providers := service_providers \ {sp1};
+		
+		IO`println(clients);
+  );
 
 functions
    

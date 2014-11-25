@@ -1,0 +1,15 @@
+class ServiceProvider
+types
+	
+values
+-- TODO Define values here
+instance variables
+	public id: nat1;
+	public nodes: set of Node;
+operations
+-- TODO Define operations here
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end ServiceProvider

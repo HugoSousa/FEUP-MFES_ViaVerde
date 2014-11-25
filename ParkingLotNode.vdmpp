@@ -1,0 +1,15 @@
+class ParkingLotNode is subclass of Node
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+	private parking_lot_id : nat1;
+	private entrance : bool;	--se for saida, tem de ter entrado antes no parking_lot com mesmo id (e nao pode passar noutros registos pelo meio)
+operations
+-- TODO Define operations here
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end ParkingLotNode

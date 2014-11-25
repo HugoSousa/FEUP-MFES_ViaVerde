@@ -11,9 +11,20 @@ operations
   Run()  ==
     (
     	dcl viaVerde : ViaVerde;
-    	dcl c : Cliente;
-			viaVerde := new ViaVerde();
-      viaVerde.addCliente("francisco");
+    	dcl c1: Client;
+    	dcl c2: Client;
+    	dcl c3: Client;
+    	
+    	viaVerde := new ViaVerde();
+    	
+    	--adiciona cliente
+    	c1 := new Client(1,"francisco", 281923918);
+      viaVerde.addClient(c1);
+      c2 := new Client(2,"francisco", 293821923);
+      viaVerde.addClient(c2);
+      c3 := new Client(1,"francisco", 192392332);
+      --so funciona se for o mesmo objeto, nao um novo
+      viaVerde.removeClient(c3);
 			
 			return "PANISGA"
     );
