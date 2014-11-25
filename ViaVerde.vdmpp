@@ -1,0 +1,29 @@
+class ViaVerde
+
+  types
+  	public Nome = seq1 of char
+    -- public clientes = Cliente;
+  values
+    
+	instance variables
+	  private clientes : set of Cliente := {};
+  operations
+  
+  public addCliente(nome_do_cliente: Nome)  ==
+  (
+      dcl novo : Cliente;
+      novo := new Cliente(nome_do_cliente);
+      addCliente(novo);
+  );
+  
+    public addCliente(cliente: Cliente) ==
+  (
+    clientes := clientes union {cliente};
+    IO`println(clientes);
+  )
+    post 
+     	clientes <> {};
+
+functions
+   
+end ViaVerde

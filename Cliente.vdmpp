@@ -1,0 +1,20 @@
+class Cliente
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+	public name : seq1 of char
+operations
+
+   public Cliente : seq1 of char ==> Cliente
+	 Cliente(nome) == (
+		name:= nome;
+		return self;
+	);
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end Cliente

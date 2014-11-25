@@ -1,0 +1,24 @@
+class Main
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
+operations
+
+	public static Run : () ==> seq1 of char
+  Run()  ==
+    (
+    	dcl viaVerde : ViaVerde;
+    	dcl c : Cliente;
+			viaVerde := new ViaVerde();
+      viaVerde.addCliente("francisco");
+			
+			return "PANISGA"
+    );
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end Main

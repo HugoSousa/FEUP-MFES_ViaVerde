@@ -1,0 +1,84 @@
+class TestTeachersPlacement
+
+  types
+    public Vaga = TeachersPlacement`Vaga;
+    public Professor = TeachersPlacement`Professor;
+    public Colocacao = TeachersPlacement`Colocacao;
+
+    public TestCase ::  
+              id: nat
+              descr: seq of char
+              vagas: set of Vaga
+              professores: seq of Professor 
+              preferencias: map Professor to seq of Vaga
+              colocacaoInicial: inmap Professor to Vaga
+              colocacoesFinaisAdmissiveis: seq of Colocacao; -- ordenadas da melhor para a pior
+
+    public Decisao = <Amarelo> | <Verde> | <Vermelho>;
+
+    public TestResult :: testCase : TestCase
+                  			 colocacaoFinal: Colocacao
+                  			 decisao: Decisao;
+
+  values
+    v1: Vaga = mk_token(1);
+    v2: Vaga = mk_token(2);
+    v3: Vaga = mk_token(3);
+    v4: Vaga = mk_token(4);
+
+    p1: Professor = mk_token(1);
+    p2: Professor = mk_token(2);
+    p3: Professor = mk_token(3);
+    p4: Professor = mk_token(4);
+
+    testCases : seq of TestCase = [
+      mk_TestCase(1, "só um professor, sem colocação inicial", 
+         {v1}, [p1], {p1 |-> [v1]}, {|->}, [{p1 |-> v1}]),
+      mk_TestCase(2, " só um professor, com colocação inicial", 
+        {v1, v2}, [p1], {p1 |-> [v2, v1]}, {p1 |-> v1}, [{p1 |-> v2}]),
+      mk_TestCase(3, "dois professores sem colocação inicial concorrem a vagas diferentes", 
+        {v1, v2}, [p1, p2], {p1 |-> [v1], p2 |-> [v2]}, {|->}, [{p1 |-> v1, p2 |-> v2}]),
+      mk_TestCase(4, "dois professores sem colocação inicial concorrem à mesma vaga", 
+        {v1}, [p1, p2], {p1 |-> [v1], p2 |-> [v1]}, {|->}, [{p1 |-> v1}]),
+     mk_TestCase(5, "dois professores com colocação inicial pretendem trocar entre si (2 sol. admiss.)", 
+        {v1, v2}, [p1, p2], {p1 |-> [v2, v1], p2 |-> [v1, v2]}, {p1 |-> v1, p2 |-> v2}, [{p1 |-> v2, p2 |-> v1}, {p1 |-> v1, p2 |-> v2}]),
+      mk_TestCase(6, "dois professores com colocação inicial concorrem a uma terceira vaga", 
+        {v1, v2, v3}, [p1, p2], {p1 |-> [v3, v1], p2 |-> [v3, v2]}, {p1 |-> v1, p2 |-> v2}, [{p1 |-> v3, p2 |-> v2}]),
+      mk_TestCase(7, "caso em que professor com pior ranking mas com colocação inicial prevalece sobre outro", 
+         {v1, v2}, [p1, p2, p3], {p1 |-> [v1], p2 |-> [v2], p3 |-> [v1, v2]}, {p3 |-> v2}, [{p1 |-> v1, p3 |-> v2}]),
+      mk_TestCase(8, "caso em que há recuperação de vaga", 
+        {v1, v2}, [p1, p2], {p1 |-> [v1], p2 |-> [v2, v1]}, {p2 |-> v1}, [{p1 |-> v1, p2 |-> v2}])  ];
+
+   functions
+     private eval(t: TestCase, actualResult: Colocacao) res: Decisao ==
+     (
+        if actualResult in set elems t.colocacoesFinaisAdmissiveis then
+           if actualResult = t.colocacoesFinaisAdmissiveis(1) then
+              <Verde>
+           else
+              <Amarelo>
+        else
+           <Vermelho>
+     );
+     
+  operations 
+    -- executa os testes definidos, e devolve os resultados dos que não passaram
+    -- (isto é, que obtiveram amarelo ou vermelho)
+    public RunTests() res: seq of TestResult ==
+    (
+			 dcl rr: seq of TestResult := [];
+       dcl c : Colocacao;
+       dcl t : TestCase;
+       dcl r : TestResult;
+       for all i in set inds testCases do
+       (
+         t := testCases(i);
+         c := TeachersPlacement`colocaProfessores(t.vagas, t.professores, t.preferencias, t.colocacaoInicial);
+         r := mk_TestResult(t, c, eval(t, c));
+         if r.decisao <> <Verde> then 
+         	rr := rr ^ [r]
+       );
+       return rr
+    );
+
+end TestTeachersPlacement
