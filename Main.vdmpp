@@ -7,7 +7,7 @@ instance variables
 -- TODO Define instance variables here
 operations
 
-	public static Run : () ==> seq1 of char
+	public static Run : () ==> bool
   Run()  ==
     (
     	dcl viaVerde : ViaVerde;
@@ -21,13 +21,42 @@ operations
     	c1 := new Client(1,"francisco", 281923918);
       viaVerde.addClient(c1);
       c2 := new Client(2,"francisco", 293821923);
-      viaVerde.addClient(c2);
-      c3 := new Client(1,"francisco", 192392332);
+      viaVerde.addClient(c1);
+      --c3 := new Client(1,"francisco", 192392332);
       --so funciona se for o mesmo objeto, nao um novo
-      viaVerde.removeClient(c3);
+      --viaVerde.removeClient(c3);
 			
-			return "PANISGA"
+			--return true;
+			Test();
     );
+    
+  public static Test : () ==> bool
+  Test() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl c1: Client;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	dcl parque1 : Service;
+  	
+  	viaVerde := new ViaVerde();
+  	c1 := new Client(1, "francisco", 281923918);
+  	brisa := new ServiceProvider();
+  	entrada_parque := new Node(new Local(1, 1));
+  	saida_parque := new Node(new Local(1, 1));
+  	
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}); --latitude, longitude, set entradas, set saidas
+  	brisa.addService(parque1);
+  	
+  	--TODO ao adicionar serviceProvider, assegurar que nao existe (variavel modificada num if VS invariant a verificar um a um)
+  	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
+  	viaVerde.addServiceProvider(brisa);
+  	--viaVerde.passa(c1, saida_parque, new Date(18, 3, 2014, 17, 43, 00)); --erro, nao passou numa entrada
+  
+  	return true;
+  )
+  
 functions
 -- TODO Define functiones here
 traces

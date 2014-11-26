@@ -9,7 +9,7 @@ class ViaVerde
 	instance variables
 	  private clients : set of Client := {};
 	  private service_providers : set of ServiceProvider := {};
-  
+  	--inv not exists node in set getAllNodes() & card node > 1;
   
   --operations
   operations
@@ -42,7 +42,8 @@ class ViaVerde
 		service_providers := service_providers union {provider};
     IO`println(service_providers);
 	);
-	
+		
+
 	--remove uma parceria com um fornecedor de servicos
 	public removeServiceProvider(provider: ServiceProvider) == 
   ( 	
@@ -53,6 +54,16 @@ class ViaVerde
 		
 		IO`println(clients);
   );
+  
+  public getAllNodes : () ==> set of Node
+	 getAllNodes() == (
+	 	dcl all_nodes: set of Node := {};
+	 	
+	 	for all service_provider in set service_providers do
+    	all_nodes := all_nodes union service_provider.getAllNodes();
+    	
+  	return all_nodes;
+	 );
 
 functions
    

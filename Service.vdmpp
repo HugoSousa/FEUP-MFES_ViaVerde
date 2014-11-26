@@ -1,19 +1,19 @@
-class Node
+class Service
 types
 -- TODO Define types here
 values
 -- TODO Define values here
 instance variables
-	private local: Local;
-operations
-	public Node : Local ==> Node
-	 Node(loc) == (
-	 	local := loc;
-		return self;
-	);
 
+
+operations
+	public getAllNodes : () ==> set of Node
+	getAllNodes() == (
+    return {};
+	);
+-- TODO Define operations here
 functions
 -- TODO Define functiones here
 traces
 -- TODO Define Combinatorial Test Traces here
-end Node
+end Service
