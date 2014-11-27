@@ -1,13 +1,22 @@
 class ServiceProvider
 types
-	
+--	
 values
--- TODO Define values here
+--
 instance variables
 	public id: nat1;
+	public name: seq1 of char;
 	public services: set of Service := {};
 	
 operations
+
+  public ServiceProvider : nat1 * seq1 of char ==> ServiceProvider
+	 ServiceProvider(ident, nome) == (
+	 	id := ident;
+		name := nome;
+		return self;
+	);
+
 	public addService : Service ==> ()
 	addService(serv) == (
     services := services union {serv};
@@ -22,8 +31,14 @@ operations
     	
   	return nodes;
 	);
+	
+	public passa : Client * Node * Date * seq of Record ==> real
+	passa(cliente, no, data, records) == (
+		 	--TODO
+		 	return 0;	
+	);
 functions
--- TODO Define functiones here
+--
 traces
--- TODO Define Combinatorial Test Traces here
+--
 end ServiceProvider

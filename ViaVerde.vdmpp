@@ -3,12 +3,13 @@ class ViaVerde
   types
   	public Nome = seq1 of char;
   	
-    -- public clientes = Cliente;
   values
-    
+	--    
 	instance variables
 	  private clients : set of Client := {};
 	  private service_providers : set of ServiceProvider := {};
+	  private records : seq of Record := [];
+	  
   	--inv not exists node in set getAllNodes() & card node > 1;
   
   --operations
@@ -34,7 +35,7 @@ class ViaVerde
   	
 		clients := clients \ {c1};
 		
-		IO`println(clients);
+		-- IO`println(clients);
   );
 	
 	--adiciona uma parceria com um fornecedor de servicos (parque estacionamento, auto-estradas, etc.)
@@ -43,6 +44,16 @@ class ViaVerde
     IO`println(service_providers);
 	);
 		
+	public passa(cliente: Client, no : Node, data: Date) == (
+	  dcl estab : ServiceProvider;
+	  dcl cost : real;
+	  dcl new_record : Record;
+		estab := getServiceProviderByNode(no);
+		cost := estab.passa(cliente, no, data, getRecordByClient(cliente));
+		new_record := new Record(cliente, no, data, estab, cost);
+		records := records ^ [new_record];
+		
+	);
 
 	--remove uma parceria com um fornecedor de servicos
 	public removeServiceProvider(provider: ServiceProvider) == 
@@ -52,8 +63,9 @@ class ViaVerde
   	
 		service_providers := service_providers \ {sp1};
 		
-		IO`println(clients);
+		-- IO`println(clients);
   );
+  
   
   public getAllNodes : () ==> set of Node
 	 getAllNodes() == (
@@ -64,6 +76,21 @@ class ViaVerde
     	
   	return all_nodes;
 	 );
+	 
+	 public getRecordByClient : Client ==> seq of Record
+	 getRecordByClient(client) == (
+	 	--TODO ESTA FUNCAo
+  	return records;
+	 );
+	 
+	 
+	 
+	 public getServiceProviderByNode : Node  ==> ServiceProvider
+	 getServiceProviderByNode(node) == (
+	 	--TODO ESTA FUNCAo
+  	return (new ServiceProvider());
+	 );
+	 
 
 functions
    

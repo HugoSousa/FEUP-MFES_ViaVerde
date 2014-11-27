@@ -1,0 +1,29 @@
+class Date
+types
+--
+values
+--
+instance variables
+	public day: nat1;
+	public month: nat1;
+	public year: nat1;
+	public hour: nat;
+	public minute: nat;
+	public second: nat;
+
+operations
+   public Date : nat1 * nat1 * nat1 * nat *nat *nat ==> Date
+	 Date(d, m, y, h, mm, s) == (
+	 	day := d;
+		month := m;
+		year := y;
+		hour := h;
+		minute := mm;
+		second := s;
+		return self;
+	);
+functions
+--
+traces
+--
+end Date
