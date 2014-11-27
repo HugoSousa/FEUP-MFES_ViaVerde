@@ -24,7 +24,7 @@ operations
 	
 	public getAllNodes : () ==> set of Node
 	getAllNodes() == (
-    dcl nodes: set of Node;
+    dcl nodes: set of Node := {};
     
     for all service in set services do
     	nodes := nodes union service.getAllNodes();
@@ -32,11 +32,22 @@ operations
   	return nodes;
 	);
 	
-	public passa : Client * Node * Date * seq of Record ==> real
-	passa(cliente, no, data, records) == (
-		 	--TODO
-		 	return 0;	
+	--retorna o custo da passagem
+	public passa : Client * Node * Time * [Record] ==> real
+	passa(client, node, time, last_record) == (
+		
+			dcl all_nodes : set of Node := {};
+			dcl used_service : Service;
+		
+		 	for all service in set services do(
+				all_nodes := service.getAllNodes();
+				if(node in set all_nodes) then 
+					used_service := service;
+			);
+		
+			return used_service.passa(client, node, time, last_record);
 	);
+	
 functions
 --
 traces

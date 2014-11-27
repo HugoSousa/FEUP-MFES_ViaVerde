@@ -6,12 +6,14 @@ values
 instance variables
 	private entrances : set of Node;
 	private exits : set of Node;
+	private price : real;
 	
 operations
-	public ParkingLot : set of Node * set of Node ==> ParkingLot
-	 ParkingLot(ins, outs) == (
+	public ParkingLot : set of Node * set of Node * real ==> ParkingLot
+	 ParkingLot(ins, outs, pr) == (
 	 	entrances := ins;
 	 	exits := outs;
+	 	price := pr;
 		return self;
 	)
 	pre
@@ -21,6 +23,30 @@ operations
 	getAllNodes() == (
     return entrances union exits;
 	);
+	
+	-- TODO precodicao so podem entrar carros e motas
+	public passa : Client * Node * Time * [Record] ==> real
+	passa(client, node, time, last_record) == (
+		-- if (last_record = nil) then return -1;
+		if(node in set entrances) then return 0;
+
+		return Time`Diff(time, last_record.timestamp) * price;
+		
+	)
+	pre
+		(
+			node in set exits
+			and
+			last_record <> nil 
+			and
+			last_record.node in set entrances
+		)
+		or
+		(
+			node in set entrances
+		)
+		;
+	
 functions
 -- TODO Define functiones here
 traces

@@ -6,12 +6,12 @@ values
 instance variables
 	public client: Client;
 	public node: Node;
-	public timestamp: Date;
+	public timestamp: Time;
 	public provider: ServiceProvider;
 	public cost: real;
 operations
 		-- constructor
-   public Record : Client * Node * Date * ServiceProvider * real ==> Record
+   public Record : Client * Node * Time * ServiceProvider * real ==> Record
 	 Record(cl, nd, time, sprov, cst) == (
 	 	client := cl ;
 		node := nd;

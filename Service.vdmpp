@@ -4,12 +4,18 @@ types
 values
 -- TODO Define values here
 instance variables
-
+	
 
 operations
 	public getAllNodes : () ==> set of Node
 	getAllNodes() == (
     return {};
+	);
+	
+	
+	public passa : Client * Node * Time * [Record] ==> real
+	passa(client, node, time, last_record) == (
+		return -1;
 	);
 -- TODO Define operations here
 functions

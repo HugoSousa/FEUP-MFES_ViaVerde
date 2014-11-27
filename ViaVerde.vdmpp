@@ -8,7 +8,7 @@ class ViaVerde
 	instance variables
 	  private clients : set of Client := {};
 	  private service_providers : set of ServiceProvider := {};
-	  private records : seq of Record := [];
+	  private records : map Client to seq of Record := { |-> };
 	  
   	--inv not exists node in set getAllNodes() & card node > 1;
   
@@ -16,23 +16,23 @@ class ViaVerde
   operations
   
   --adiciona um cliente
-  public addClient(cliente: Client) ==
+  public addClient(client: Client) ==
   (
-    clients := clients union {cliente};
+    clients := clients union {client};
+    records := records munion {client |-> []};
     IO`println(clients);
   )
     post 
      	clients <> {};
   
   --remove um cliente   	
-  public removeClient(cliente: Client) == 
+  public removeClient(client: Client) == 
   ( 	
   	--IO`println(cliente.name);
   	--clientes := clientes \ {cliente};
   	--percorrer o set e comparar o nome
   	dcl c1 : Client;
-  	c1 := iota c in set clients & c.id = cliente.id;
-  	
+  	c1 := iota c in set clients & c.id = client.id;
 		clients := clients \ {c1};
 		
 		-- IO`println(clients);
@@ -44,14 +44,33 @@ class ViaVerde
     IO`println(service_providers);
 	);
 		
-	public passa(cliente: Client, no : Node, data: Date) == (
+	--TODO o cliente tem de estar adicionado no sistema
+	public passa(client: Client, node : Node, time: Time) == (
 	  dcl estab : ServiceProvider;
 	  dcl cost : real;
 	  dcl new_record : Record;
-		estab := getServiceProviderByNode(no);
-		cost := estab.passa(cliente, no, data, getRecordByClient(cliente));
-		new_record := new Record(cliente, no, data, estab, cost);
-		records := records ^ [new_record];
+	  dcl last_record : [Record];
+	  dcl client_records : seq of Record;
+	  dcl last_record_id : nat;
+	  
+	  client_records := records(client);	  
+	  last_record_id := len client_records;
+	  if (last_record_id = 0) 
+	  then (
+	  	last_record := nil;
+	  	)
+	  else (
+	  	last_record :=  client_records(last_record_id);
+	  	);
+	
+	  --IO`println("RECORDS:" ^ client_records);
+		estab := getServiceProviderByNode(node);
+		cost := estab.passa(client, node, time, last_record);
+		
+		new_record := new Record(client, node, time, estab, cost);
+		client_records := client_records ^ [new_record];
+		records := records ++ { client |-> client_records };
+		IO`println("AFTER RECORDS: " ^ records(client));
 		
 	);
 
@@ -76,19 +95,21 @@ class ViaVerde
     	
   	return all_nodes;
 	 );
-	 
-	 public getRecordByClient : Client ==> seq of Record
-	 getRecordByClient(client) == (
-	 	--TODO ESTA FUNCAo
-  	return records;
-	 );
-	 
-	 
-	 
-	 public getServiceProviderByNode : Node  ==> ServiceProvider
+		 
+	
+	 public getServiceProviderByNode : Node ==> ServiceProvider
 	 getServiceProviderByNode(node) == (
-	 	--TODO ESTA FUNCAo
-  	return (new ServiceProvider());
+		
+		dcl all_nodes : set of Node := {};
+		dcl service_provider: ServiceProvider;
+		
+		for all sp in set service_providers do(
+			all_nodes := sp.getAllNodes();
+			if(node in set all_nodes) then 
+				service_provider:= sp;
+		);
+
+  	return service_provider;
 	 );
 	 
 

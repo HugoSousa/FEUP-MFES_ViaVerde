@@ -1,0 +1,34 @@
+class Time
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+
+public timestamp: nat1;
+public month: nat1;
+private static month_counter: nat1 := 1;
+
+operations
+
+public static Diff : Time * Time ==> real
+Diff (time1,time2) == (
+	 return abs(time1.timestamp - time2.timestamp);
+);
+
+
+public static incMonth() == ( 	
+  		month_counter := month_counter + 1;
+);
+
+public Time : nat1 ==> Time
+	 Time(t) == (
+	 	timestamp := t;
+		month := month_counter;
+		return self;
+	);
+functions
+
+traces
+-- TODO Define Combinatorial Test Traces here
+end Time

@@ -10,23 +10,6 @@ operations
 	public static Run : () ==> bool
   Run()  ==
     (
-    	dcl viaVerde : ViaVerde;
-    	dcl c1: Client;
-    	dcl c2: Client;
-    	dcl c3: Client;
-    	
-    	viaVerde := new ViaVerde();
-    	
-    	--adiciona cliente
-    	c1 := new Client(1,"francisco", 281923918);
-      viaVerde.addClient(c1);
-      c2 := new Client(2,"francisco", 293821923);
-      viaVerde.addClient(c2);
-      --c3 := new Client(1,"francisco", 192392332);
-      --so funciona se for o mesmo objeto, nao um novo
-      --viaVerde.removeClient(c3);
-			
-			--return true;
 			Test();
     );
     
@@ -39,21 +22,28 @@ operations
   	dcl entrada_parque : Node;
   	dcl saida_parque : Node;
   	dcl parque1 : Service;
+  	dcl time: Time;
+  	dcl time2: Time;
   	
+  	time := new Time(12);
   	viaVerde := new ViaVerde();
   	c1 := new Client(1, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	
   	brisa := new ServiceProvider(1, "Brisa");
   	entrada_parque := new Node(new Local(1, 1));
-  	saida_parque := new Node(new Local(1, 1));
+  	saida_parque := new Node(new Local(2, 2));
   	
-  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}); --latitude, longitude, set entradas, set saidas
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
   	brisa.addService(parque1);
   	
   	--TODO ao adicionar serviceProvider, assegurar que nao existe (variavel modificada num if VS invariant a verificar um a um)
   	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
   	viaVerde.addServiceProvider(brisa);
-  	viaVerde.passa(c1, saida_parque, new Date(18, 3, 2014, 17, 43, 0)); --erro, nao passou numa entrada
-  
+  	viaVerde.passa(c1, entrada_parque, time); --erro, nao passou numa entrada
+  	viaVerde.passa(c1, saida_parque, time); --erro, nao passou numa entrada
+  	
+  	
   	return true;
   )
   
