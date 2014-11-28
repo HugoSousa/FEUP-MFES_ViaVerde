@@ -1,6 +1,6 @@
 class Main
 types
--- TODO Define types here
+
 values
 -- TODO Define values here
 instance variables
@@ -26,13 +26,14 @@ operations
   	dcl time2: Time;
   	
   	time := new Time(12);
+  	time2 := new Time(15);
   	viaVerde := new ViaVerde();
-  	c1 := new Client(1, "francisco", 281923918);
+  	c1 := new Client(<C1>, "francisco", 281923918);
   	viaVerde.addClient(c1);
   	
   	brisa := new ServiceProvider(1, "Brisa");
-  	entrada_parque := new Node(new Local(1, 1));
-  	saida_parque := new Node(new Local(2, 2));
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2, 2);
   	
   	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
   	brisa.addService(parque1);
@@ -41,8 +42,8 @@ operations
   	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
   	viaVerde.addServiceProvider(brisa);
   	viaVerde.passa(c1, entrada_parque, time); --erro, nao passou numa entrada
-  	viaVerde.passa(c1, saida_parque, time); --erro, nao passou numa entrada
-  	
+  	viaVerde.passa(c1, saida_parque, time2); --erro, nao passou numa entrada
+   	
   	
   	return true;
   )

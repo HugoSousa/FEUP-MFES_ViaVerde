@@ -1,14 +1,17 @@
 class Node
 types
--- TODO Define types here
+	public Local :: 	latitude: nat1
+										longitude: nat1;
+												
 values
 -- TODO Define values here
 instance variables
 	private local: Local;
+	
 operations
-	public Node : Local ==> Node
-	 Node(loc) == (
-	 	local := loc;
+	public Node : nat1 * nat1 ==> Node
+	 Node(lat, long) == (
+	 	local := mk_Local(lat, long);
 		return self;
 	);
 

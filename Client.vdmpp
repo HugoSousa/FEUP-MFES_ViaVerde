@@ -1,18 +1,18 @@
 class Client
 types
--- 
+	public class_v = <C1> | <C2> | <C3> | <C4>
 values
 --
 instance variables
-	public id: nat1;
+	public class_vehicle : class_v;
 	public name : seq1 of char;
-	public payment_card : int; --ter invariante que obriga este numero a ter X numeros?
+	public payment_card : int; 
 	
 operations
 
-   public Client : nat1 * seq1 of char * int ==> Client
-	 Client(ident, nome, pay_card) == (
-	 	id := ident;
+   public Client : class_v * seq1 of char * int ==> Client
+	 Client(c, nome, pay_card) == (
+	 	class_vehicle := c;
 		name := nome;
 		payment_card := pay_card;
 		return self;

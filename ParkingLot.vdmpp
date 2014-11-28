@@ -24,13 +24,15 @@ operations
     return entrances union exits;
 	);
 	
+	
+	
 	-- TODO precodicao so podem entrar carros e motas
 	public passa : Client * Node * Time * [Record] ==> real
 	passa(client, node, time, last_record) == (
 		-- if (last_record = nil) then return -1;
 		if(node in set entrances) then return 0;
 
-		return Time`Diff(time, last_record.timestamp) * price;
+		return Time`Diff(time, last_record.time) * price;
 		
 	)
 	pre
@@ -40,6 +42,8 @@ operations
 			last_record <> nil 
 			and
 			last_record.node in set entrances
+			and
+			Time`compareTimes(time.timestamp, last_record.time.timestamp) > 0
 		)
 		or
 		(
@@ -47,8 +51,11 @@ operations
 		)
 		;
 	
+	
+	
 functions
 -- TODO Define functiones here
+
 traces
 -- TODO Define Combinatorial Test Traces here
 end ParkingLot

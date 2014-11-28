@@ -31,9 +31,7 @@ class ViaVerde
   	--IO`println(cliente.name);
   	--clientes := clientes \ {cliente};
   	--percorrer o set e comparar o nome
-  	dcl c1 : Client;
-  	c1 := iota c in set clients & c.id = client.id;
-		clients := clients \ {c1};
+		clients := clients \ {client};
 		
 		-- IO`println(clients);
   );
@@ -51,20 +49,12 @@ class ViaVerde
 	  dcl new_record : Record;
 	  dcl last_record : [Record];
 	  dcl client_records : seq of Record;
-	  dcl last_record_id : nat;
 	  
-	  client_records := records(client);	  
-	  last_record_id := len client_records;
-	  if (last_record_id = 0) 
-	  then (
-	  	last_record := nil;
-	  	)
-	  else (
-	  	last_record :=  client_records(last_record_id);
-	  	);
-	
-	  --IO`println("RECORDS:" ^ client_records);
-		estab := getServiceProviderByNode(node);
+	  estab := getServiceProviderByNode(node);
+	  client_records := records(client);	
+	   
+	  last_record := getLastRecord(client, estab);
+	  
 		cost := estab.passa(client, node, time, last_record);
 		
 		new_record := new Record(client, node, time, estab, cost);
@@ -112,7 +102,20 @@ class ViaVerde
   	return service_provider;
 	 );
 	 
-
+	public getLastRecord : Client * ServiceProvider ==> [Record]
+	getLastRecord(client, serviceProvider) == (
+		dcl client_records : seq of Record;
+		dcl last_record: [Record] := nil;
+	  
+	  client_records := records(client);
+	  
+	  for all c in set elems client_records do
+  		if (serviceProvider = c.provider) then
+  			last_record := c;
+  			
+  	return last_record;
+	);
+	
 functions
    
 end ViaVerde

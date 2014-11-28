@@ -1,0 +1,29 @@
+class ComplexSinglePoint is subclass of Service
+types
+	public class_v = <C1> | <C2> | <C3> | <C4>
+values
+-- TODO Define values here
+instance variables
+	public node: Node;
+	public prices: map class_v to real;
+operations
+	public ComplexSinglePoint : Node * map class_v to real ==> ComplexSinglePoint
+	 ComplexSinglePoint(n, p) == (
+	 	node := n;
+	 	prices := p;
+		return self;
+	);
+	
+	public passa : Client * Node * Time * [Record] ==> real
+	passa(client, node, time, last_record) == (
+		dcl price : real;
+		
+		price := prices(client.class_vehicle);
+		
+		return price;
+	);
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end ComplexSinglePoint

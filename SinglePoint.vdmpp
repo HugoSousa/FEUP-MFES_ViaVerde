@@ -1,0 +1,26 @@
+class SinglePoint is subclass of Service
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+	public node: Node;
+	public price: real;
+operations
+	public SinglePoint : Node * real ==> SinglePoint
+	 SinglePoint(n, p) == (
+	 	node := n;
+	 	price := p;
+		return self;
+	);
+	
+	public passa : Client * Node * Time * [Record] ==> real
+	passa(client, node, time, last_record) == (
+		return price;
+	);
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end SinglePoint

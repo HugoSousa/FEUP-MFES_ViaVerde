@@ -14,9 +14,8 @@ operations
 	
 	
 	public passa : Client * Node * Time * [Record] ==> real
-	passa(client, node, time, last_record) == (
-		return -1;
-	);
+	passa(client, node, time, last_record) == 
+		is subclass responsibility;
 -- TODO Define operations here
 functions
 -- TODO Define functiones here
