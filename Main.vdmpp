@@ -2,7 +2,8 @@ class Main
 types
 
 values
--- TODO Define values here
+
+	
 instance variables
 -- TODO Define instance variables here
 operations
@@ -24,16 +25,26 @@ operations
   	dcl parque1 : Service;
   	dcl time: Time;
   	dcl time2: Time;
+  	dcl time3: Time;
+  	dcl time4: Time;
+  	dcl AE_entrou: HighwayNode;
+  	dcl AE_saiu: HighwayNode;
   	
   	time := new Time(12);
   	time2 := new Time(15);
+  	time3 := new Time(18);
+  	time3 := new Time(25);
   	viaVerde := new ViaVerde();
+  	
+  	
+  	--viaVerde.highway_prices := highway_prices;
+  	
   	c1 := new Client(<C1>, "francisco", 281923918);
   	viaVerde.addClient(c1);
   	
   	brisa := new ServiceProvider(1, "Brisa");
   	entrada_parque := new Node(1,1);
-  	saida_parque := new Node(2, 2);
+  	saida_parque := new Node(2,2);
   	
   	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
   	brisa.addService(parque1);
@@ -41,9 +52,22 @@ operations
   	--TODO ao adicionar serviceProvider, assegurar que nao existe (variavel modificada num if VS invariant a verificar um a um)
   	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
   	viaVerde.addServiceProvider(brisa);
-  	viaVerde.passa(c1, entrada_parque, time); --erro, nao passou numa entrada
+  	viaVerde.passa(c1, entrada_parque, time);
   	viaVerde.passa(c1, saida_parque, time2); --erro, nao passou numa entrada
    	
+   	-- exemplo de tabela de precos de auto-estradas
+   	AE_entrou := new HighwayNode(5,5, <ENTRANCE>);
+   	AE_saiu := new HighwayNode(6,6, <EXIT>);
+   		
+		viaVerde.highway_prices := 
+		{ 
+			mk_ViaVerde`OriginDestiny(AE_entrou, AE_saiu, <C1>) |-> 3.5, 
+			mk_ViaVerde`OriginDestiny(new HighwayNode(1,1,<ENTRANCE>), new HighwayNode (3,3,<EXIT>), <C1>) |-> 4.2,
+			mk_ViaVerde`OriginDestiny(new HighwayNode(1,1,<ENTRANCE>), new HighwayNode (4,4,<EXIT>), <C1>) |-> 4.7,
+			mk_ViaVerde`OriginDestiny(new HighwayNode(1,1,<ENTRANCE>), new HighwayNode (4,5,<EXIT>), <C1>) |-> 5.9,
+			mk_ViaVerde`OriginDestiny(new HighwayNode(1,1,<ENTRANCE>), new HighwayNode (5,4,<EXIT>), <C1>) |-> 6.3
+		};
+  	viaVerde.passa(c1, AE_entrou, time3);
   	
   	return true;
   )

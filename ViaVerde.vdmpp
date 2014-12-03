@@ -2,11 +2,16 @@ class ViaVerde
 
   types
   	public Nome = seq1 of char;
-  	
+  	public OriginDestiny :: origin: HighwayNode
+  													destination: HighwayNode
+  													classe: Client`class_v;
   values
 	--    
 	instance variables
-	  private clients : set of Client := {};
+		--tabela de preços tem de estar no sistema, pois é possivel intercalar em auto-estradas de diferentes concessionárias
+		public highway_prices : map OriginDestiny to real := { |-> };
+	
+	  public clients : set of Client := {};
 	  private service_providers : set of ServiceProvider := {};
 	  private records : map Client to seq of Record := { |-> };
 	  
@@ -14,7 +19,7 @@ class ViaVerde
   
   --operations
   operations
-  
+   
   --adiciona um cliente
   public addClient(client: Client) ==
   (
@@ -44,19 +49,43 @@ class ViaVerde
 		
 	--TODO o cliente tem de estar adicionado no sistema
 	public passa(client: Client, node : Node, time: Time) == (
-	  dcl estab : ServiceProvider;
+	  dcl estab : [ServiceProvider] := nil;
 	  dcl cost : real;
 	  dcl new_record : Record;
 	  dcl last_record : [Record];
 	  dcl client_records : seq of Record;
 	  
-	  estab := getServiceProviderByNode(node);
-	  client_records := records(client);	
-	   
-	  last_record := getLastRecord(client, estab);
 	  
-		cost := estab.passa(client, node, time, last_record);
+	  --verifica se entrou antes numa AE
+	  --se nao entrou, entao assumir que esta a entrar na AE
+  	--senao retorna preco, indo buscar ao map
+	  if (isofclass(HighwayNode, node)) then
+		(
+			last_record := getLastHighwayRecord(client);
+			if(last_record = nil) then
+		 	(
+			 cost:= 0.0;
+		 	)
+			elseif (isofclass(HighwayNode, last_record.node)) then
+			(
+				cost := highway_prices(mk_OriginDestiny(last_record.node, node, client.class_vehicle));
+			)
+			else
+			(cost := 0.0);
+		)
+  	else
+	 	(
+	 		estab := getServiceProviderByNode(node);
+		  	
+		   
+		  last_record := getLastRecord(client, estab);
+	 	
+	 		cost := estab.passa(client, node, time, last_record)
+	 	);
+  	
+	  
 		
+		client_records := records(client);
 		new_record := new Record(client, node, time, estab, cost);
 		client_records := client_records ^ [new_record];
 		records := records ++ { client |-> client_records };
@@ -114,6 +143,21 @@ class ViaVerde
   			last_record := c;
   			
   	return last_record;
+	);
+	
+	public getLastHighwayRecord : Client ==> [Record]
+	getLastHighwayRecord(client) == (
+		dcl client_records : seq of Record;
+		dcl last_highway_record : [Record] := nil;
+		
+		client_records := records(client);
+	  client_records := reverse client_records;
+	  
+	  for r in client_records do
+	  if (isofclass(HighwayNode, r.node)) then
+	  	last_highway_record := r;
+	  	
+	  return last_highway_record;
 	);
 	
 functions

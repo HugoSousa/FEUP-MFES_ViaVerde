@@ -15,7 +15,7 @@ operations
 	);
 	
 	public passa : Client * Node * Time * [Record] ==> real
-	passa(client, node, time, last_record) == (
+	passa(client, -, -, -) == (
 		dcl price : real;
 		
 		price := prices(client.class_vehicle);

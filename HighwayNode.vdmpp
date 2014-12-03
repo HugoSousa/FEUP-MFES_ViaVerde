@@ -1,22 +1,19 @@
-class Node
+class HighwayNode is subclass of Node
 types
-	public Local :: 	latitude: nat1
-										longitude: nat1;
-												
+	public Type = <ENTRANCE> | <EXIT>;
 values
 -- TODO Define values here
 instance variables
-	protected local: Local;
-	
+	private type: Type;
 operations
-	public Node : nat1 * nat1 ==> Node
-	 Node(lat, long) == (
+	public HighwayNode : nat1 * nat1 * Type ==> HighwayNode
+	 HighwayNode(lat, long, t) == (
 	 	local := mk_Local(lat, long);
+	 	type := t;
 		return self;
 	);
-
 functions
 -- TODO Define functiones here
 traces
 -- TODO Define Combinatorial Test Traces here
-end Node
+end HighwayNode
