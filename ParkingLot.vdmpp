@@ -35,6 +35,7 @@ operations
 		return Time`Diff(time, last_record.time) * price;
 		
 	)
+	-- tem de sair depois de entrar / nao pode entrar 2 vezes no parque sem sair
 	pre
 		(
 			node in set exits
@@ -48,6 +49,16 @@ operations
 		or
 		(
 			node in set entrances
+			and 
+			(
+				last_record = nil
+			)
+			or
+			(
+				last_record <> nil
+				and
+				not last_record.node in set entrances
+			)
 		)
 		;
 	

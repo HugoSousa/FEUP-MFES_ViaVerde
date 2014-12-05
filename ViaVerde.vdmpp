@@ -2,21 +2,36 @@ class ViaVerde
 
   types
   	public Nome = seq1 of char;
+  	
   	public OriginDestiny :: origin: HighwayNode
-  													destination: HighwayNode
-  													classe: Client`class_v;
+  													destination: HighwayNode;
+  													
+		public CostByClass = map Client`class_v to real;
+		
+		public Invoice :: month: nat1
+											price: real
+											paid: bool;
+											
   values
 	--    
 	instance variables
+		--limite imaginario de unidades de distancia que um veiculo se pode deslocar por unidade de tempo 
+		public MAX_SPEED : real := 3;
+		
 		--tabela de preços tem de estar no sistema, pois é possivel intercalar em auto-estradas de diferentes concessionárias
-		public highway_prices : map OriginDestiny to real := { |-> };
+		public highway_prices : map OriginDestiny to CostByClass := { |-> };
 	
 	  public clients : set of Client := {};
 	  private service_providers : set of ServiceProvider := {};
 	  private records : map Client to seq of Record := { |-> };
+	  private invoices: map Client to seq of Invoice := { |-> };
+	  public month: nat1;
 	  
-  	--inv not exists node in set getAllNodes() & card node > 1;
-  
+	  --nao existem faturas emitidas para um mes superior ao atual
+	  --nao existem nos repetidos em diferentes service_providers
+  	--inv not exists n in set getAllNodes() & card n > 1;
+  	--os records estão em ordem crescente de tempo em cada client
+  	
   --operations
   operations
    
@@ -25,6 +40,7 @@ class ViaVerde
   (
     clients := clients union {client};
     records := records munion {client |-> []};
+    invoices := invoices munion {client |-> []};
     IO`println(clients);
   )
     post 
@@ -52,45 +68,89 @@ class ViaVerde
 	  dcl estab : [ServiceProvider] := nil;
 	  dcl cost : real;
 	  dcl new_record : Record;
-	  dcl last_record : [Record];
+	  dcl last_record : [Record] := nil;
 	  dcl client_records : seq of Record;
 	  
+		--se for HighwayNode, tem de passar numa entrada antes de passar na saida
+		--se o par entrada-saida nao existe na tabela de preços, e um par invalido
+	  MyTestCase`assertTrue(
+		  (
+		  	isofclass(HighwayNode, node) 
+				and 
+				(
+					let n : HighwayNode = node in true
+					and
+					(
+						(
+							n.type = <EXIT>
+							and
+							getLastHighwayRecord(client) <> nil
+							and
+							let n1 : HighwayNode = getLastHighwayRecord(client).node in true
+							and
+							n1.type = <ENTRANCE>
+							and 
+							mk_OriginDestiny(n, n1) in set dom highway_prices
+						)
+						or
+						(
+							n.type = <ENTRANCE>
+						)
+					)
+				)
+				or (not isofclass(HighwayNode, node))
+				
+			)
+		);
+		
+		--teste espaço-temporal, nao pode passar em 2 locais numa distancia de tempo "impossivel". velocidade teorica maxima atribuida em MAX_SPEED
+		--nova passagem tem de ser mais recente que a ultima
+		MyTestCase`assertTrue(
+			last_record = nil
+			or
+			(
+				last_record <> nil
+				and
+			  (distance(node.local, last_record.node.local) / (time.timestamp - last_record.time.timestamp)) <= MAX_SPEED
+			  and time.timestamp > last_record.time.timestamp
+		  )
+		);
 	  
-	  --verifica se entrou antes numa AE
-	  --se nao entrou, entao assumir que esta a entrar na AE
-  	--senao retorna preco, indo buscar ao map
 	  if (isofclass(HighwayNode, node)) then
-		(
+		(	
+			dcl hn : HighwayNode;
 			last_record := getLastHighwayRecord(client);
-			if(last_record = nil) then
+			hn := node;
+			if(hn.type = <ENTRANCE>) then
 		 	(
 			 cost:= 0.0;
 		 	)
-			elseif (isofclass(HighwayNode, last_record.node)) then
-			(
-				cost := highway_prices(mk_OriginDestiny(last_record.node, node, client.class_vehicle));
-			)
 			else
-			(cost := 0.0);
+			(
+				dcl entrance_node : HighwayNode;
+				entrance_node := last_record.node;
+				cost := highway_prices(mk_OriginDestiny(entrance_node , hn))(client.class_vehicle);
+			);
 		)
   	else
 	 	(
 	 		estab := getServiceProviderByNode(node);
-		  	
-		   
+		  			   
 		  last_record := getLastRecord(client, estab);
 	 	
 	 		cost := estab.passa(client, node, time, last_record)
 	 	);
   	
-	  
-		
 		client_records := records(client);
 		new_record := new Record(client, node, time, estab, cost);
 		client_records := client_records ^ [new_record];
 		records := records ++ { client |-> client_records };
 		IO`println("AFTER RECORDS: " ^ records(client));
 		
+	)
+	pre
+	(
+		client in set clients
 	);
 
 	--remove uma parceria com um fornecedor de servicos
@@ -147,19 +207,48 @@ class ViaVerde
 	
 	public getLastHighwayRecord : Client ==> [Record]
 	getLastHighwayRecord(client) == (
-		dcl client_records : seq of Record;
-		dcl last_highway_record : [Record] := nil;
+		/*let rc = records(client),
+			  rch = [rc(i) | i in set inds rc & isofclass(HighwayNode, rc(i).node)]
+		in return if rch = [] then nil else rch(len rch);*/
 		
-		client_records := records(client);
-	  client_records := reverse client_records;
-	  
-	  for r in client_records do
-	  if (isofclass(HighwayNode, r.node)) then
-	  	last_highway_record := r;
-	  	
-	  return last_highway_record;
+	  for r in reverse records(client) do
+	  	if (isofclass(HighwayNode, r.node)) then
+	  		return r;	 	
+	  return nil; 
 	);
 	
+	public incrementMonth : () ==> ()
+ 	incrementMonth() == (
+	 	month := month + 1;
+	 	for all client in set clients do
+	 		sendInvoice(client);
+ 	);
+ 	
+	public sendInvoice : Client ==> ()
+ 	sendInvoice(client) == (
+ 			dcl client_balance: real;
+
+ 			for all record in set elems records(client) do
+ 				if(record.time.month = month - 1) then
+ 					client_balance := client_balance + record.cost;
+ 			
+	 		invoices := invoices ++ {client |-> {invoices(client) ^ [mk_Invoice(month - 1, client_balance, false)]}};
+ 	);
+ 	
+ 	--VERIFICAR SE ISTO ESTA CORRETO
+	public payInvoice : Client * nat1 ==> ()
+ 	payInvoice(client, m) == (
+ 		dcl client_invoices : seq of Invoice := invoices(client);
+ 		dcl a : real;
+ 		
+ 		for index = 1 to len client_invoices do
+			if(client_invoices(index).month = m) then
+				client_invoices := client_invoices ++ { index |-> mk_Invoice(client_invoices(index).month, client_invoices(index).price, true)};
+ 	);
+	
 functions
-   
+	public distance(l1: Node`Local, l2: Node`Local) res: real ==
+    (
+      MATH`sqrt((l2.latitude - l1.latitude)*(l2.latitude - l1.latitude) + (l2.longitude - l1.longitude)*(l2.longitude - l1.longitude))
+    );
 end ViaVerde

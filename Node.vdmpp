@@ -6,7 +6,7 @@ types
 values
 -- TODO Define values here
 instance variables
-	protected local: Local;
+	public local: Local;
 	
 operations
 	public Node : nat1 * nat1 ==> Node

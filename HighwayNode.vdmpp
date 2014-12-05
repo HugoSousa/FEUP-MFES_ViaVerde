@@ -4,7 +4,7 @@ types
 values
 -- TODO Define values here
 instance variables
-	private type: Type;
+	public type: Type;
 operations
 	public HighwayNode : nat1 * nat1 * Type ==> HighwayNode
 	 HighwayNode(lat, long, t) == (

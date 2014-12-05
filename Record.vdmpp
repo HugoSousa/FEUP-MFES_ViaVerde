@@ -19,7 +19,18 @@ operations
 		provider := sprov;
 		cost := cst;
 		return self;
-		
+	)
+	
+	pre
+	(
+		(
+			--ServiceProvider apenas e nil se o node for um HighwayNode
+			sprov = nil
+			and 
+			isofclass(HighwayNode, nd)
+		)
+		or
+			sprov <> nil
 	);
 functions
 --	
