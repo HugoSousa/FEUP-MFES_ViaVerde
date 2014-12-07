@@ -1,21 +1,350 @@
-class Main
+class Tests is subclass of MyTestCase
 types
 
 values
 
-	
 instance variables
 -- TODO Define instance variables here
 operations
 
-	public static Run : () ==> bool
+	public static Run : () ==> ()
   Run()  ==
-    (
-			Test();
-    );
-    
-  public static Test : () ==> bool
-  Test() ==
+  (
+		--Test1();
+		--Test2();
+		--Test3();
+		--Test4();
+		--Test5();
+		--Test6();
+		Test7();
+		/*
+		TestX();
+		TestY();
+		TestZ();
+		TestW();
+		*/
+  );
+  
+  
+  /* USE CASE SCENARIOS */
+  
+  --adicionar protocolo
+  public static SignProtocol : ViaVerde * ServiceProvider ==> ()
+  SignProtocol(vv, sp) ==
+  (
+  	vv.addServiceProvider(sp);
+  	  
+  )
+  pre
+  	not sp in set vv.service_providers
+	post
+		--nao existem registos para este service provider ainda
+		sp in set vv.service_providers
+  ;
+  
+  --remover protocolo
+  public static CancelProtocol : ViaVerde * ServiceProvider ==> ()
+  CancelProtocol(vv, sp) ==
+  (
+  	vv.removeServiceProvider(sp);
+  	  	
+  )
+  pre
+  	sp in set vv.service_providers
+	post
+		not sp in set vv.service_providers
+  ;
+  
+  --adiciona cliente
+  public static addClient : ViaVerde * Client ==> ()
+  addClient(vv, cl) ==
+  (
+  	vv.addClient(cl);
+  	  	
+  )
+  pre
+  	not cl in set vv.clients
+	post
+		cl in set vv.clients
+  ;
+  
+  --remove cliente
+  public static removeClient : ViaVerde * Client ==> ()
+  removeClient(vv, cl) ==
+  (
+  	vv.removeClient(cl);
+  	  	
+  )
+  pre
+  	cl in set vv.clients
+	post
+		not cl in set vv.clients
+  ;
+  
+  --passa sensor
+  public static passSensor : ViaVerde * Client * Node * Time  ==> ()
+  passSensor(vv, cl, node, t) ==
+  (
+  	vv.passa(cl, node, t);
+  	
+  )
+  --pre
+  	--SE FOR HIGHWAYNODE
+	  	--nao esta dentro de parque (ultimo record do client nao é entrada de parque)
+	  	--se node é entrada, ultimo record nao pode ser entrada
+	  	--se node é saida, ultimo record tem de ser entrada
+	  	--se node é saída, tem de existir no map o preço para o par entrada-saida
+  	--SE FOR PARKING LOT
+  		--nao esta dentro de AE
+  		--se node e entrada, ultimo record nao pode ser entrada
+  		--se node é saída, ultimo record tem de ser entrada
+		--RESTRICAO ESPACO TEMPORAL
+	--post
+		--atualizacao do balance do cliente correto (assertEquals)
+   ;
+  
+ --paga fatura mensal
+  public static payInvoice : ViaVerde * Client * nat1   ==> ()
+  payInvoice(vv, cl, m) ==
+  (
+  	vv.payInvoice(cl, m);
+  	
+  )
+  --pre
+  	--fatura do mes anterior ja foi emitida para esse cliente e esta sinalizada como nao paga
+	--post
+		--fatura sinalizada como paga
+   ;
+   
+  --emite fatura mensal
+  public static emitInvoice : ViaVerde * Client ==> ()
+  emitInvoice(vv, cl) ==
+  (
+  	vv.sendInvoice(cl);
+  	
+  )
+	--post
+		--fatura sinalizada como nao paga
+   ;
+  
+  
+  /* VALID TEST CASES */
+  
+  --testar adicao e remocao de protocolos
+ 	public static Test1 : () ==> ()
+  Test1() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl ascendi: ServiceProvider;
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	brisa := new ServiceProvider("Brisa");
+  	ascendi := new ServiceProvider("Ascendi");
+  	
+  	viaVerde.addServiceProvider(brisa);
+  	viaVerde.addServiceProvider(ascendi);
+  	viaVerde.removeServiceProvider(brisa);
+  	
+  );
+  
+  --testar adicao e remocao de clientes
+ 	public static Test2 : () ==> ()
+  Test2() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl c1: Client;
+  	dcl c2: Client;
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	c2 := new Client(<C4>, "joao", 1236334198);
+  	
+  	viaVerde.addClient(c1);
+  	viaVerde.removeClient(c1);
+  	viaVerde.addClient(c1);
+  	viaVerde.addClient(c2);
+  	
+  );
+  
+  --testar passagem em sensor de highway (entrada e saida)
+ 	public static Test3 : () ==> ()
+  Test3() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl c1: Client;
+  	dcl brisa: ServiceProvider;
+  	dcl AE_entrada: HighwayNode;
+  	dcl AE_saida: HighwayNode;
+  	
+  	
+  	viaVerde := new ViaVerde();
+  	AE_entrada := new HighwayNode(5,5, <ENTRANCE>);
+   	AE_saida := new HighwayNode(6,6, <EXIT>);
+  	viaVerde.highway_prices := 
+		{ 
+			mk_ViaVerde`OriginDestiny(AE_entrada, AE_saida) |-> {<C1> |-> 4.2, <C2> |-> 5.6, <C3> |-> 5.6, <C4> |-> 5.6}
+		};
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	brisa := new ServiceProvider("Brisa");
+  	
+  	
+  	viaVerde.passa(c1, AE_entrada, new Time(10));
+  	viaVerde.passa(c1, AE_saida, new Time(200));
+  	
+  	--1o registo: entrada / 2o registo: saida
+  	assertEqual(0, viaVerde.records(c1)(1).cost);
+  	assertEqual(4.2, viaVerde.records(c1)(2).cost);
+  	
+  );
+  
+  --testar passagem em sensor de pagamento simples
+ 	public static Test4 : () ==> ()
+  Test4() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl c1: Client;
+  	dcl brisa: ServiceProvider;
+  	dcl no: Node;
+  	dcl sensor: SinglePoint;
+  	
+  	
+  	viaVerde := new ViaVerde();
+  	no := new Node(5,5);
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	brisa := new ServiceProvider("Brisa");
+  	sensor := new SinglePoint(no, 2.3);
+  	brisa.addService(sensor);
+  	viaVerde.addServiceProvider(brisa);
+  	
+  	viaVerde.passa(c1, no, new Time(10));
+  	
+  	--1o registo: entrada / 2o registo: saida
+  	assertEqual(2.3, viaVerde.records(c1)(1).cost);
+  	
+  );
+  
+  --testar passagem em sensor de pagamento complexo (dependente de classe do veiculo)
+ 	public static Test5 : () ==> ()
+  Test5() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl c1: Client;
+  	dcl c2: Client;
+  	dcl c3: Client;
+  	dcl c4: Client;
+  	dcl brisa: ServiceProvider;
+  	dcl no: Node;
+  	dcl sensor: ComplexSinglePoint;
+  	
+  	
+  	viaVerde := new ViaVerde();
+  	no := new Node(5,5);
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	c2 := new Client(<C2>, "hugo", 123456789);
+  	c3 := new Client(<C3>, "carla", 738920139);
+  	c4 := new Client(<C4>, "cristiano", 788832193);
+  	viaVerde.addClient(c1);
+  	viaVerde.addClient(c2);
+  	viaVerde.addClient(c3);
+  	viaVerde.addClient(c4);
+  	brisa := new ServiceProvider("Brisa");
+  	sensor := new ComplexSinglePoint(no, {<C1> |-> 1.0, <C2> |-> 2.2, <C3> |-> 3.1, <C4> |-> 4.9});
+  	brisa.addService(sensor);
+  	viaVerde.addServiceProvider(brisa);
+  	
+  	viaVerde.passa(c1, no, new Time(10));
+  	viaVerde.passa(c2, no, new Time(11));
+  	viaVerde.passa(c3, no, new Time(12));
+  	viaVerde.passa(c4, no, new Time(13));
+  	
+  	assertEqual(1.0, viaVerde.records(c1)(1).cost);
+  	assertEqual(2.2, viaVerde.records(c2)(1).cost);
+  	assertEqual(3.1, viaVerde.records(c3)(1).cost);
+  	assertEqual(4.9, viaVerde.records(c4)(1).cost);
+  	
+  );
+  
+  
+  --testar passagem em sensores de parque de estacionamento (entrada e saida)
+ 	public static Test6 : () ==> ()
+  Test6() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl c1: Client;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	dcl parque1 : Service;
+  	
+  	viaVerde := new ViaVerde();
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	brisa := new ServiceProvider("Brisa");
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2,2);
+  	
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 1.5);
+  	brisa.addService(parque1);
+  	
+  	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
+  	viaVerde.addServiceProvider(brisa);
+  	viaVerde.passa(c1, entrada_parque, new Time(10));
+  	viaVerde.passa(c1, saida_parque, new Time(15));
+   	
+   	assertEqual(0, viaVerde.records(c1)(1).cost);
+   	--unidades de tempo * preço por unidade de tempo
+   	assertEqual(5*1.5, viaVerde.records(c1)(2).cost);
+  	
+  );
+  
+    --testar emissao e pagamento de faturas
+ 	public static Test7 : () ==> ()
+  Test7() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl c1: Client;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	dcl parque1 : Service;
+  	
+  	viaVerde := new ViaVerde();
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	brisa := new ServiceProvider("Brisa");
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2,2);
+  	
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 1.5);
+  	brisa.addService(parque1);
+  	
+  	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
+  	viaVerde.addServiceProvider(brisa);
+  	viaVerde.passa(c1, entrada_parque, new Time(10));
+  	viaVerde.passa(c1, saida_parque, new Time(15));
+   	
+   	--faturas sao emitidas
+   	viaVerde.incrementMonth();
+   	
+   	assertEqual(5*1.5, viaVerde.invoices(c1)(1).price);
+   	assertEqual(false, viaVerde.invoices(c1)(1).paid);
+   	
+   	--month comeca em 1 por defeito
+   	viaVerde.payInvoice(c1, 1);
+  	
+  	assertEqual(true, viaVerde.invoices(c1)(1).paid);
+  );
+  
+  public static TestX : () ==> bool
+  TestX() ==
   (
   	dcl viaVerde : ViaVerde;
   	dcl brisa: ServiceProvider;
@@ -35,15 +364,13 @@ operations
   	time := new Time(12);
   	time2 := new Time(15);
   	time3 := new Time(18);
-  	time3 := new Time(25);
+  	time4 := new Time(25);
   	viaVerde := new ViaVerde();
-  	
-  	--viaVerde.highway_prices := highway_prices;
   	
   	c1 := new Client(<C1>, "francisco", 281923918);
   	viaVerde.addClient(c1);
   	
-  	brisa := new ServiceProvider(1, "Brisa");
+  	brisa := new ServiceProvider("Brisa");
   	entrada_parque := new Node(1,1);
   	entrada_parque2 := new Node(3,3);
   	saida_parque := new Node(2,2);
@@ -51,12 +378,11 @@ operations
   	parque1 := new ParkingLot({entrada_parque, entrada_parque2}, {saida_parque}, 2.3);
   	brisa.addService(parque1);
   	
-  	--TODO ao adicionar serviceProvider, assegurar que nao existe (variavel modificada num if VS invariant a verificar um a um)
   	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
-  	viaVerde.addServiceProvider(brisa);
-  	viaVerde.passa(c1, entrada_parque, time);
+  	SignProtocol(viaVerde, brisa);
+  	passSensor(viaVerde, c1, entrada_parque, time);
   	--viaVerde.passa(c1, entrada_parque2, time2);
-  	viaVerde.passa(c1, saida_parque, time2); --erro, nao passou numa entrada
+  	passSensor(viaVerde, c1, saida_parque, time2); --erro, nao passou numa entrada
    	
    	-- exemplo de tabela de precos de auto-estradas
    	AE_entrou := new HighwayNode(5,5, <ENTRANCE>);
@@ -67,15 +393,117 @@ operations
 			mk_ViaVerde`OriginDestiny(AE_entrou, AE_saiu) |-> {<C1> |-> 4.2, <C2> |-> 5.6}
 		};
 		--viaVerde.passa(c1, AE_saiu, time3);
-  	viaVerde.passa(c1, AE_entrou, time3);
-  	
-  	IO`println(viaVerde.distance(mk_Node`Local(1,2), mk_Node`Local(2,3)));
+  	--viaVerde.passa(c1, AE_entrou, time3);
+  	passSensor(viaVerde,c1,AE_entrou,time3);
+  	--IO`println(viaVerde.distance(mk_Node`Local(1,2), mk_Node`Local(2,3)));
   	
   	return true;
-  )
+  );
+  
+  --testar emissao e pagamento de fatura
+  public static TestY : () ==> bool
+  TestY() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl c1: Client;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	dcl parque1 : Service;
+  	dcl time: Time;
+  	dcl time2: Time;
+  	dcl time3: Time;
+  	dcl time4: Time;
+ 
+ 		time := new Time(12);
+  	time2 := new Time(15);
+  	time3 := new Time(18);
+  	time4 := new Time(25);
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2,2);
+  	brisa := new ServiceProvider("Brisa");
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
+  	brisa.addService(parque1);
+  	
+  	viaVerde.addServiceProvider(brisa);
+  	viaVerde.passa(c1, entrada_parque, time);
+  	viaVerde.passa(c1, saida_parque, time2);
+  	
+  	viaVerde.incrementMonth();
+  	viaVerde.payInvoice(c1, viaVerde.month - 1);
+  	
+  	--IO`println(viaVerde.invoices(c1)(1).price);
+  	--IO`println(viaVerde.invoices(c1)(1).paid);
+  	
+  	return true;
+  );
+  
+  --testar adição e remoção de protocolos com serviceProviders
+  public static TestZ : () ==> bool
+  TestZ() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl ascendi: ServiceProvider;
+  	dcl parque1 : Service;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2,2);
+  	brisa := new ServiceProvider("Brisa");
+  	ascendi := new ServiceProvider("Ascendi");
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
+  	brisa.addService(parque1);
+  	
+  	--devia dar erro -> 2 serviceProviders com os mesmo nos 
+  	--ascendi.addService(parque1);
+  	
+  	viaVerde.addServiceProvider(brisa); 	
+  	IO`println(viaVerde.service_providers);
+  	viaVerde.addServiceProvider(ascendi);
+  	IO`println(viaVerde.service_providers);
+  	viaVerde.removeServiceProvider(ascendi);
+  	IO`println(viaVerde.service_providers);
+  	
+  	return true;
+  );
+  
+  --testar associar e remover clientes
+  public static TestW : () ==> bool
+  TestW() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl c1: Client;
+  	dcl c2: Client;
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	c2 := new Client(<C4>, "joao", 242114232);
+  	viaVerde.addClient(c1);
+  	viaVerde.addClient(c2);
+  	
+  	viaVerde.removeClient(c1);
+  	--viaVerde.removeClient(c1);
+  	--devia dar erro -> 2 serviceProviders com os mesmo nos 
+  	--ascendi.addService(parque1);
+  	
+  	
+  	return true;
+  );
   
 functions
 -- TODO Define functiones here
 traces
 -- TODO Define Combinatorial Test Traces here
-end Main
+end Tests

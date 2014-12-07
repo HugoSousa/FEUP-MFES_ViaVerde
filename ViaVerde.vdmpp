@@ -22,15 +22,16 @@ class ViaVerde
 		public highway_prices : map OriginDestiny to CostByClass := { |-> };
 	
 	  public clients : set of Client := {};
-	  private service_providers : set of ServiceProvider := {};
-	  private records : map Client to seq of Record := { |-> };
-	  private invoices: map Client to seq of Invoice := { |-> };
-	  public month: nat1;
-	  
-	  --nao existem faturas emitidas para um mes superior ao atual
+	  public service_providers : set of ServiceProvider := {};
+	  public records : map Client to seq of Record := { |-> };
+	  public invoices: map Client to seq of Invoice := { |-> };
+	  public month: nat1 := 1;
+	   
 	  --nao existem nos repetidos em diferentes service_providers
   	--inv not exists n in set getAllNodes() & card n > 1;
-  	--os records estão em ordem crescente de tempo em cada client
+  	
+  	--month entre 1 e 12
+  	inv month >= 1 and month <= 12;
   	
   --operations
   operations
@@ -41,10 +42,12 @@ class ViaVerde
     clients := clients union {client};
     records := records munion {client |-> []};
     invoices := invoices munion {client |-> []};
-    IO`println(clients);
+    --IO`println(clients);
   )
-    post 
-     	clients <> {};
+  pre
+  	not client in set clients
+  post 
+   	clients <> {};
   
   --remove um cliente   	
   public removeClient(client: Client) == 
@@ -55,13 +58,17 @@ class ViaVerde
 		clients := clients \ {client};
 		
 		-- IO`println(clients);
-  );
+  )
+  pre
+  	client in set clients;
 	
 	--adiciona uma parceria com um fornecedor de servicos (parque estacionamento, auto-estradas, etc.)
 	public addServiceProvider(provider: ServiceProvider) == (
 		service_providers := service_providers union {provider};
-    IO`println(service_providers);
-	);
+    --IO`println(service_providers);
+	)
+	pre
+		not provider in set service_providers;
 		
 	--TODO o cliente tem de estar adicionado no sistema
 	public passa(client: Client, node : Node, time: Time) == (
@@ -70,31 +77,33 @@ class ViaVerde
 	  dcl new_record : Record;
 	  dcl last_record : [Record] := nil;
 	  dcl client_records : seq of Record;
-	  
+	  time.month := month;
 		--se for HighwayNode, tem de passar numa entrada antes de passar na saida
 		--se o par entrada-saida nao existe na tabela de preços, e um par invalido
 	  MyTestCase`assertTrue(
 		  (
-		  	isofclass(HighwayNode, node) 
-				and 
-				(
-					let n : HighwayNode = node in true
-					and
+		  	(
+			  	isofclass(HighwayNode, node) 
+					and 
 					(
+						let n : HighwayNode = node in true
+						and
 						(
-							n.type = <EXIT>
-							and
-							getLastHighwayRecord(client) <> nil
-							and
-							let n1 : HighwayNode = getLastHighwayRecord(client).node in true
-							and
-							n1.type = <ENTRANCE>
-							and 
-							mk_OriginDestiny(n, n1) in set dom highway_prices
-						)
-						or
-						(
-							n.type = <ENTRANCE>
+							(
+								n.type = <EXIT>
+								and
+								getLastHighwayRecord(client) <> nil
+								and
+								let n1 : HighwayNode = getLastHighwayRecord(client).node in true
+								and
+								n1.type = <ENTRANCE>
+								and 
+								mk_OriginDestiny(n1, n) in set dom highway_prices
+							)
+							or
+							(
+								n.type = <ENTRANCE>
+							)
 						)
 					)
 				)
@@ -103,6 +112,8 @@ class ViaVerde
 			)
 		);
 		
+		if(len records(client) > 0) then
+			last_record := records(client)(len records(client));
 		--teste espaço-temporal, nao pode passar em 2 locais numa distancia de tempo "impossivel". velocidade teorica maxima atribuida em MAX_SPEED
 		--nova passagem tem de ser mais recente que a ultima
 		MyTestCase`assertTrue(
@@ -145,7 +156,7 @@ class ViaVerde
 		new_record := new Record(client, node, time, estab, cost);
 		client_records := client_records ^ [new_record];
 		records := records ++ { client |-> client_records };
-		IO`println("AFTER RECORDS: " ^ records(client));
+		--IO`println("AFTER RECORDS: " ^ records(client));
 		
 	)
 	pre
@@ -156,15 +167,17 @@ class ViaVerde
 	--remove uma parceria com um fornecedor de servicos
 	public removeServiceProvider(provider: ServiceProvider) == 
   ( 	
-  	dcl sp1 : ServiceProvider;
-  	sp1 := iota sp in set service_providers & sp.id = provider.id;
+  	--dcl sp1 : ServiceProvider;
+  	--sp1 := iota sp in set service_providers & sp.id = provider.id;
   	
-		service_providers := service_providers \ {sp1};
+		service_providers := service_providers \ {provider};
 		
 		-- IO`println(clients);
-  );
+  )
+  pre
+  	provider in set service_providers;
   
-  
+  /*
   public getAllNodes : () ==> set of Node
 	 getAllNodes() == (
 	 	dcl all_nodes: set of Node := {};
@@ -174,7 +187,7 @@ class ViaVerde
     	
   	return all_nodes;
 	 );
-		 
+		*/ 
 	
 	 public getServiceProviderByNode : Node ==> ServiceProvider
 	 getServiceProviderByNode(node) == (
@@ -226,24 +239,33 @@ class ViaVerde
  	
 	public sendInvoice : Client ==> ()
  	sendInvoice(client) == (
- 			dcl client_balance: real;
+ 			dcl client_balance: real := 0.0;
+ 			dcl previous_month: int;
+ 			
+ 			if(month = 1) then
+ 				previous_month := 12
+ 			else
+ 				previous_month := month - 1;
 
  			for all record in set elems records(client) do
- 				if(record.time.month = month - 1) then
+ 				if(record.time.month = previous_month) then
  					client_balance := client_balance + record.cost;
  			
-	 		invoices := invoices ++ {client |-> {invoices(client) ^ [mk_Invoice(month - 1, client_balance, false)]}};
+	 		invoices := invoices ++ {client |-> invoices(client) ^ [mk_Invoice(month - 1, client_balance, false)]};
  	);
  	
- 	--VERIFICAR SE ISTO ESTA CORRETO
+ 	--pre condicao: a fatura tem de ter sido emitida ja (verificar cliente e mes)
 	public payInvoice : Client * nat1 ==> ()
  	payInvoice(client, m) == (
  		dcl client_invoices : seq of Invoice := invoices(client);
- 		dcl a : real;
  		
- 		for index = 1 to len client_invoices do
+ 		for index = len client_invoices to 1 do
 			if(client_invoices(index).month = m) then
+			(
 				client_invoices := client_invoices ++ { index |-> mk_Invoice(client_invoices(index).month, client_invoices(index).price, true)};
+				invoices := invoices ++ {client |-> client_invoices};
+				return;
+			);
  	);
 	
 functions

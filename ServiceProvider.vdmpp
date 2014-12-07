@@ -4,15 +4,15 @@ types
 values
 --
 instance variables
-	public id: nat1;
+	--public id: nat1;
 	public name: seq1 of char;
 	public services: set of Service := {};
 	
 operations
 
-  public ServiceProvider : nat1 * seq1 of char ==> ServiceProvider
-	 ServiceProvider(ident, nome) == (
-	 	id := ident;
+  public ServiceProvider : seq1 of char ==> ServiceProvider
+	 ServiceProvider(nome) == (
+	 	--id := ident;
 		name := nome;
 		return self;
 	);

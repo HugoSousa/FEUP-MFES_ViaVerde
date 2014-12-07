@@ -8,11 +8,9 @@ instance variables
 
 operations
 	public getAllNodes : () ==> set of Node
-	getAllNodes() == (
-    return {};
-	);
-	
-	
+	getAllNodes() == 
+    is subclass responsibility;
+		
 	public passa : Client * Node * Time * [Record] ==> real
 	passa(client, node, time, last_record) == 
 		is subclass responsibility;

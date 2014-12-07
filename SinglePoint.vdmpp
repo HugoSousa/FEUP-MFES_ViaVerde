@@ -14,6 +14,11 @@ operations
 		return self;
 	);
 	
+	public getAllNodes : () ==> set of Node
+	getAllNodes() == (
+    return {node};
+	);
+	
 	public passa : Client * Node * Time * [Record] ==> real
 	passa(-, -, -, -) == (
 		return price;
