@@ -185,13 +185,17 @@ class ViaVerde
 		
 		dcl all_nodes : set of Node := {};
 		dcl service_provider: ServiceProvider;
+		dcl found: bool;
+		found:= false;
 		
 		for all sp in set service_providers do(
 			all_nodes := sp.getAllNodes();
-			if(node in set all_nodes) then 
+			if(node in set all_nodes) then( 
+			  found:= true;
 				service_provider:= sp;
+				)
 		);
-
+		Condition`assertTrue(found);
   	return service_provider;
 	 );
 	 
