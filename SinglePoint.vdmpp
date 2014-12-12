@@ -1,11 +1,9 @@
 class SinglePoint is subclass of Service
-types
--- TODO Define types here
-values
--- TODO Define values here
+
 instance variables
 	public node: Node;
 	public price: real;
+	
 operations
 	public SinglePoint : Node * real ==> SinglePoint
 	 SinglePoint(n, p) == (
@@ -24,8 +22,4 @@ operations
 		return price;
 	);
 	
-functions
--- TODO Define functiones here
-traces
--- TODO Define Combinatorial Test Traces here
 end SinglePoint

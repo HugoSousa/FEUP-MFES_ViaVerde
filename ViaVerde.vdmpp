@@ -13,11 +13,11 @@ class ViaVerde
 											paid: bool;
 											
   values
-	--    
-	instance variables
-		--limite imaginario de unidades de distancia que um veiculo se pode deslocar por unidade de tempo 
-		public MAX_SPEED : real := 3;
+  	--limite imaginario de unidades de distancia que um veiculo se pode deslocar por unidade de tempo 
+		public MAX_SPEED = 3;  
 		
+	instance variables
+	
 		--tabela de preços tem de estar no sistema, pois é possivel intercalar em auto-estradas de diferentes concessionárias
 		public highway_prices : map OriginDestiny to CostByClass := { |-> };
 	
@@ -26,10 +26,7 @@ class ViaVerde
 	  public records : map Client to seq of Record := { |-> };
 	  public invoices: map Client to seq of Invoice := { |-> };
 	  public month: nat1 := 1;
-	   
-	  --nao existem nos repetidos em diferentes service_providers
-  	--inv not exists n in set getAllNodes() & card n > 1;
-  	
+	    	
   	--month entre 1 e 12
   	inv month >= 1 and month <= 12;
   	
@@ -42,7 +39,6 @@ class ViaVerde
     clients := clients union {client};
     records := records munion {client |-> []};
     invoices := invoices munion {client |-> []};
-    --IO`println(clients);
   )
   pre
   	not client in set clients
@@ -52,23 +48,25 @@ class ViaVerde
   --remove um cliente   	
   public removeClient(client: Client) == 
   ( 	
-  	--IO`println(cliente.name);
-  	--clientes := clientes \ {cliente};
-  	--percorrer o set e comparar o nome
 		clients := clients \ {client};
-		
-		-- IO`println(clients);
   )
   pre
   	client in set clients;
 	
 	--adiciona uma parceria com um fornecedor de servicos (parque estacionamento, auto-estradas, etc.)
 	public addServiceProvider(provider: ServiceProvider) == (
+		
+		Condition`assertTrue(
+    	provider.getAllNodes() inter getAllNodes() = {}
+    );
+	
 		service_providers := service_providers union {provider};
-    --IO`println(service_providers);
+
 	)
 	pre
 		not provider in set service_providers;
+	
+	
 		
 	--TODO o cliente tem de estar adicionado no sistema
 	public passa(client: Client, node : Node, time: Time) == (
@@ -77,25 +75,23 @@ class ViaVerde
 	  dcl new_record : Record;
 	  dcl last_record : [Record] := nil;
 	  dcl client_records : seq of Record;
-	  time.month := month;
+	  time.setMonth(month);
 		--se for HighwayNode, tem de passar numa entrada antes de passar na saida
 		--se o par entrada-saida nao existe na tabela de preços, e um par invalido
-	  MyTestCase`assertTrue(
+	  Condition`assertTrue(
 		  (
 		  	(
 			  	isofclass(HighwayNode, node) 
 					and 
 					(
-						let n : HighwayNode = node in true
-						and
+						let n  = narrow_(node,HighwayNode) in 
 						(
 							(
 								n.type = <EXIT>
 								and
 								getLastHighwayRecord(client) <> nil
 								and
-								let n1 : HighwayNode = getLastHighwayRecord(client).node in true
-								and
+								let n1 = narrow_(getLastHighwayRecord(client).node, HighwayNode) in 
 								n1.type = <ENTRANCE>
 								and 
 								mk_OriginDestiny(n1, n) in set dom highway_prices
@@ -116,7 +112,7 @@ class ViaVerde
 			last_record := records(client)(len records(client));
 		--teste espaço-temporal, nao pode passar em 2 locais numa distancia de tempo "impossivel". velocidade teorica maxima atribuida em MAX_SPEED
 		--nova passagem tem de ser mais recente que a ultima
-		MyTestCase`assertTrue(
+		Condition`assertTrue(
 			last_record = nil
 			or
 			(
@@ -167,17 +163,12 @@ class ViaVerde
 	--remove uma parceria com um fornecedor de servicos
 	public removeServiceProvider(provider: ServiceProvider) == 
   ( 	
-  	--dcl sp1 : ServiceProvider;
-  	--sp1 := iota sp in set service_providers & sp.id = provider.id;
-  	
 		service_providers := service_providers \ {provider};
-		
-		-- IO`println(clients);
   )
   pre
   	provider in set service_providers;
   
-  /*
+  
   public getAllNodes : () ==> set of Node
 	 getAllNodes() == (
 	 	dcl all_nodes: set of Node := {};
@@ -187,7 +178,7 @@ class ViaVerde
     	
   	return all_nodes;
 	 );
-		*/ 
+		
 	
 	 public getServiceProviderByNode : Node ==> ServiceProvider
 	 getServiceProviderByNode(node) == (

@@ -1,8 +1,7 @@
 class Client
 types
 	public class_v = <C1> | <C2> | <C3> | <C4>
-values
---
+	
 instance variables
 	public class_vehicle : class_v;
 	public name : seq1 of char;
@@ -18,6 +17,4 @@ operations
 		return self;
 	);
 	
-functions
---
 end Client

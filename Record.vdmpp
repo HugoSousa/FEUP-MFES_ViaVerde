@@ -1,16 +1,14 @@
 class Record
-types
---
-values
---
+
 instance variables
 	public client: Client;
 	public node: Node;
 	public time: Time;
 	public provider: [ServiceProvider];
 	public cost: real;
+	
 operations
-		-- constructor
+
    public Record : Client * Node * Time * [ServiceProvider] * real ==> Record
 	 Record(cl, nd, t, sprov, cst) == (
 	 	client := cl ;
@@ -20,7 +18,6 @@ operations
 		cost := cst;
 		return self;
 	)
-	
 	pre
 	(
 		(
@@ -32,8 +29,5 @@ operations
 		or
 			sprov <> nil
 	);
-functions
---	
-traces
---
+	
 end Record

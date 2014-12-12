@@ -1,10 +1,6 @@
 class ServiceProvider
-types
---	
-values
---
+
 instance variables
-	--public id: nat1;
 	public name: seq1 of char;
 	public services: set of Service := {};
 	
@@ -12,13 +8,17 @@ operations
 
   public ServiceProvider : seq1 of char ==> ServiceProvider
 	 ServiceProvider(nome) == (
-	 	--id := ident;
 		name := nome;
 		return self;
 	);
 
 	public addService : Service ==> ()
 	addService(serv) == (
+	
+		Condition`assertTrue(
+    	serv.getAllNodes() inter getAllNodes() = {}
+    );
+	
     services := services union {serv};
 	);
 	
@@ -48,8 +48,4 @@ operations
 			return used_service.passa(client, node, time, last_record);
 	);
 	
-functions
---
-traces
---
 end ServiceProvider

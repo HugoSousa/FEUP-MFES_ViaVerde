@@ -1,12 +1,12 @@
 class ParkingLot is subclass of Service
-types
--- TODO Define types here
-values
--- TODO Define values here
+
 instance variables
 	private entrances : set of Node;
 	private exits : set of Node;
 	private price : real;
+	
+	--nao existem sensores de entrada e entrada simultaneamente
+	inv entrances inter exits = {};
 	
 operations
 	public ParkingLot : set of Node * set of Node * real ==> ParkingLot
@@ -24,12 +24,8 @@ operations
     return entrances union exits;
 	);
 	
-	
-	
-	-- TODO precodicao so podem entrar carros e motas
 	public passa : Client * Node * Time * [Record] ==> real
 	passa(-, node, time, last_record) == (
-		-- if (last_record = nil) then return -1;
 		if(node in set entrances) then return 0;
 
 		return Time`Diff(time, last_record.time) * price;
@@ -62,11 +58,4 @@ operations
 		)
 		;
 	
-	
-	
-functions
--- TODO Define functiones here
-
-traces
--- TODO Define Combinatorial Test Traces here
 end ParkingLot

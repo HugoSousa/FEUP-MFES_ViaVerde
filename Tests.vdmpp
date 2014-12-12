@@ -1,10 +1,5 @@
-class Tests is subclass of MyTestCase
-types
+class Tests is subclass of Condition
 
-values
-
-instance variables
--- TODO Define instance variables here
 operations
 
 	public static Run : () ==> ()
@@ -17,6 +12,7 @@ operations
 		--Test5();
 		--Test6();
 		Test7();
+		--TestABC();
 		/*
 		TestX();
 		TestY();
@@ -179,7 +175,6 @@ operations
   	dcl AE_entrada: HighwayNode;
   	dcl AE_saida: HighwayNode;
   	
-  	
   	viaVerde := new ViaVerde();
   	AE_entrada := new HighwayNode(5,5, <ENTRANCE>);
    	AE_saida := new HighwayNode(6,6, <EXIT>);
@@ -211,7 +206,6 @@ operations
   	dcl brisa: ServiceProvider;
   	dcl no: Node;
   	dcl sensor: SinglePoint;
-  	
   	
   	viaVerde := new ViaVerde();
   	no := new Node(5,5);
@@ -400,8 +394,47 @@ operations
   	return true;
   );
   
+  public static TestABC : () ==> ()
+  TestABC() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl brisa: ServiceProvider;
+  	dcl brisa2: ServiceProvider;
+  	dcl c1: Client;
+  	dcl entrada_parque : Node;
+  	dcl saida_parque : Node;
+  	dcl saida_parque2: Node;
+  	dcl parque1 : Service;
+  	dcl parque2: Service;
+  	dcl time: Time;
+  	dcl time2: Time;
+  	dcl time3: Time;
+  	dcl time4: Time;
+  	
+  	viaVerde := new ViaVerde();
+  	
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	
+  	entrada_parque := new Node(1,1);
+  	saida_parque := new Node(2,2);
+  	saida_parque2 := new Node(3,3);
+  	brisa := new ServiceProvider("Brisa");
+  	brisa2 := new ServiceProvider("Brisa2");
+  	parque1 := new ParkingLot({entrada_parque}, {saida_parque}, 2.3);
+  	parque2 := new ParkingLot({entrada_parque}, {saida_parque2}, 2.3);
+  	brisa.addService(parque1);
+  	brisa2.addService(parque2);
+  	
+  	viaVerde.addServiceProvider(brisa);
+  	viaVerde.addServiceProvider(brisa2);
+  	--viaVerde.passa(c1, entrada_parque, time);
+  	--viaVerde.passa(c1, saida_parque, time2);
+  );
+  
+  
   --testar emissao e pagamento de fatura
-  public static TestY : () ==> bool
+  public static TestY : () ==> ()
   TestY() ==
   (
   	dcl viaVerde : ViaVerde;
@@ -441,7 +474,6 @@ operations
   	--IO`println(viaVerde.invoices(c1)(1).price);
   	--IO`println(viaVerde.invoices(c1)(1).paid);
   	
-  	return true;
   );
   
   --testar adição e remoção de protocolos com serviceProviders
@@ -502,8 +534,4 @@ operations
   	return true;
   );
   
-functions
--- TODO Define functiones here
-traces
--- TODO Define Combinatorial Test Traces here
 end Tests
