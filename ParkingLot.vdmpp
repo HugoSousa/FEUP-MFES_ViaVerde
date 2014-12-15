@@ -26,36 +26,38 @@ operations
 	
 	public passa : Client * Node * Time * [Record] ==> real
 	passa(-, node, time, last_record) == (
+
 		if(node in set entrances) then return 0;
 
 		return Time`Diff(time, last_record.time) * price;
 		
-	)
+	)pre
 	-- tem de sair depois de entrar / nao pode entrar 2 vezes no parque sem sair
-	pre
-		(
-			node in set exits
-			and
-			last_record <> nil 
-			and
-			last_record.node in set entrances
-			and
-			Time`compareTimes(time.timestamp, last_record.time.timestamp) > 0
-		)
-		or
-		(
-			node in set entrances
-			and 
 			(
-				last_record = nil
+				node in set exits
+				and
+				last_record <> nil 
+				and
+				last_record.node in set entrances
+				and
+				Time`compareTimes(time.timestamp, last_record.time.timestamp) > 0
 			)
 			or
 			(
-				last_record <> nil
-				and
-				not last_record.node in set entrances
-			)
-		)
-		;
+				node in set entrances
+				and 
+				(
+					(
+						last_record = nil
+					)
+					or
+					(
+						last_record <> nil
+						and
+						not last_record.node in set entrances
+					)
+				)
+			);
+
 	
 end ParkingLot

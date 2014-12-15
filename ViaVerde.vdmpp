@@ -117,6 +117,8 @@ class ViaVerde
 			or
 			(
 				last_record <> nil
+				and 
+				time.timestamp - last_record.time.timestamp > 0
 				and
 			  (distance(node.local, last_record.node.local) / (time.timestamp - last_record.time.timestamp)) <= MAX_SPEED
 			  and time.timestamp > last_record.time.timestamp

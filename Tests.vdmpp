@@ -6,7 +6,8 @@ operations
   Run()  ==
   (
   
-  -- Valid test cases   
+  -- Valid test cases  
+   
 		Test1(); --testar adicao e remocao de protocolos
 		Test2(); --testar adicao e remocao de clientes
 		Test3(); --testar passagem em sensor de highway (entrada e saida)
@@ -23,9 +24,9 @@ operations
     -- Test12(); --testar passar em num sensor com tempo anterior
     -- Test13(); --testar passar em num no que nao existe em nenhum serviço
     -- Test14(); --testar passar em parque saida antes de entrada
-    /* NOT WORKING */ Test15(); --testar passar em parque entrar duas vezes (entradas diferentes)
+    -- Test15(); --testar passar em parque entrar duas vezes (entradas diferentes)
     -- Test16();--testar entrar num parque e passar na autoestrada a meio
-     /* NOT WORKING TODO*/-- Test17(); --testar passar ao mesmo tempo em 2 nos
+    -- Test17(); --testar passar ao mesmo tempo em 2 nos
   );
   
 
@@ -466,6 +467,7 @@ operations
   	viaVerde.passa(c1, s2, new Time(15));
    	
   );
+  
   --testar passar em parque entrar duas vezes (entradas diferentes)
     public static Test15 : () ==> ()
   Test15() ==
@@ -495,9 +497,11 @@ operations
   	--TODO fazer o check ao adicionar serviceProvider que nenhum dos nos adicionados dentro esta a ser usado noutro serviceProdiver
   	viaVerde.addServiceProvider(brisa);
   	viaVerde.passa(c1, e1, new Time(10));
-  	viaVerde.passa(c1, s2, new Time(15));
-  	viaVerde.passa(c1, s1, new Time(20));
-  	viaVerde.passa(c1, s1, new Time(21));
+  	viaVerde.passa(c1, e2, new Time(15));
+  	
+  	--2 saidas apos entrada tambem falha
+  	--viaVerde.passa(c1, s1, new Time(20));
+  	--viaVerde.passa(c1, s1, new Time(21));
   	
    	
   );
@@ -544,7 +548,8 @@ operations
    	
   );
   
-      public static Test17 : () ==> ()
+  --testar entrar e sair de parque no mesmo timestamp
+  public static Test17 : () ==> ()
   Test17() ==
   (
   	dcl viaVerde : ViaVerde;
