@@ -229,7 +229,12 @@ class ViaVerde
 	
 	public incrementMonth : () ==> ()
  	incrementMonth() == (
-	 	month := month + 1;
+	 	
+	 	if(month = 12) then
+	 		month:= 1
+	 	else
+	 		month := month + 1;
+	 		
 	 	for all client in set clients do
 	 		sendInvoice(client);
  	);
