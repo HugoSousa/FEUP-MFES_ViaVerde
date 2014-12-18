@@ -4,6 +4,7 @@ instance variables
 
 public timestamp: nat1;
 public month: nat1;
+public year: nat1;
 
 operations
 
@@ -15,14 +16,11 @@ Diff (time1,time2) == (
 public Time : nat1 ==> Time
 	 Time(t) == (
 	 	month := 1;
+	 	year := 2014;
 	 	timestamp := t;
 		return self;
 	);
 	
-public setMonth : nat1 ==> ()
-	 setMonth(m) == (
-	 	month := m;
-	);
 functions
 
 	public compareTimes : nat1 * nat1 -> int

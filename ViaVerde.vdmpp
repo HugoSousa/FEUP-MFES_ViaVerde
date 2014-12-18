@@ -9,6 +9,7 @@ class ViaVerde
 		public CostByClass = map Client`class_v to real;
 		
 		public Invoice :: month: nat1
+											year: nat1
 											price: real
 											paid: bool;
 											
@@ -26,8 +27,8 @@ class ViaVerde
 	  public records : map Client to seq of Record := { |-> };
 	  public invoices: map Client to seq of Invoice := { |-> };
 	  public month: nat1 := 1;
+	  public year: nat1 := 2014;
 	    	
-  	--month entre 1 e 12
   	inv month >= 1 and month <= 12;
   	
   --operations
@@ -67,15 +68,14 @@ class ViaVerde
 		not provider in set service_providers;
 	
 	
-		
-	--TODO o cliente tem de estar adicionado no sistema
 	public passa(client: Client, node : Node, time: Time) == (
 	  dcl estab : [ServiceProvider] := nil;
 	  dcl cost : real;
 	  dcl new_record : Record;
 	  dcl last_record : [Record] := nil;
 	  dcl client_records : seq of Record;
-	  time.setMonth(month);
+	  time.month := month;
+	  time.year := year;
 		--se for HighwayNode, tem de passar numa entrada antes de passar na saida
 		--se o par entrada-saida nao existe na tabela de preços, e um par invalido
 	  Condition`assertTrue(
@@ -153,9 +153,7 @@ class ViaVerde
 		client_records := records(client);
 		new_record := new Record(client, node, time, estab, cost);
 		client_records := client_records ^ [new_record];
-		records := records ++ { client |-> client_records };
-		--IO`println("AFTER RECORDS: " ^ records(client));
-		
+		records := records ++ { client |-> client_records };		
 	)
 	pre
 	(
@@ -230,8 +228,9 @@ class ViaVerde
 	public incrementMonth : () ==> ()
  	incrementMonth() == (
 	 	
-	 	if(month = 12) then
-	 		month:= 1
+	 	if(month = 12) then(
+	 		month:= 1;
+	 		year := year + 1;)
 	 	else
 	 		month := month + 1;
 	 		
@@ -242,33 +241,38 @@ class ViaVerde
 	public sendInvoice : Client ==> ()
  	sendInvoice(client) == (
  			dcl client_balance: real := 0.0;
- 			dcl previous_month: int;
+ 			dcl previous_month: nat1 := month;
+ 			dcl previous_year : nat1 := year;
  			
- 			if(month = 1) then
- 				previous_month := 12
- 			else
- 				previous_month := month - 1;
+ 			if(month = 1) then(
+ 				previous_month := 12;
+ 				previous_year := year - 1;
+ 			)
+ 			else(
+ 				previous_month := month - 1
+ 			);
 
  			for all record in set elems records(client) do
- 				if(record.time.month = previous_month) then
+ 				if(record.time.month = previous_month and record.time.year = previous_year) then
  					client_balance := client_balance + record.cost;
  			
-	 		invoices := invoices ++ {client |-> invoices(client) ^ [mk_Invoice(month - 1, client_balance, false)]};
+	 		invoices := invoices ++ {client |-> invoices(client) ^ [mk_Invoice(previous_month, previous_year, client_balance, false)]};
  	);
  	
- 	--pre condicao: a fatura tem de ter sido emitida ja (verificar cliente e mes)
-	public payInvoice : Client * nat1 ==> ()
- 	payInvoice(client, m) == (
+	public payInvoice : Client * nat1 * nat1==> ()
+ 	payInvoice(client, m, y) == (
  		dcl client_invoices : seq of Invoice := invoices(client);
  		
  		for index = len client_invoices to 1 do
-			if(client_invoices(index).month = m) then
+			if(client_invoices(index).month = m and client_invoices(index).year = y) then
 			(
-				client_invoices := client_invoices ++ { index |-> mk_Invoice(client_invoices(index).month, client_invoices(index).price, true)};
+				client_invoices := client_invoices ++ { index |-> mk_Invoice(client_invoices(index).month, client_invoices(index).year, client_invoices(index).price, true)};
 				invoices := invoices ++ {client |-> client_invoices};
 				return;
 			);
- 	);
+ 	)
+ 	pre
+ 		exists i in set elems invoices(client) & (i.month = m and i.year = y);
 	
 functions
 	public distance(l1: Node`Local, l2: Node`Local) res: real ==

@@ -7,26 +7,26 @@ operations
   (
   
   -- Valid test cases  
-   
-		Test1(); --testar adicao e remocao de protocolos
-		Test2(); --testar adicao e remocao de clientes
-		Test3(); --testar passagem em sensor de highway (entrada e saida)
-		Test4(); --testar passagem em sensor de pagamento simples
-		Test5(); --testar passagem em sensor de pagamento complexo (dependente de classe do veiculo)
-		Test6(); --testar passagem em sensores de parque de estacionamento (entrada e saida)
-		Test7(); --testar emissao e pagamento de faturas
+		Test1(); --testar adicao e remocao de protocolos /*R1*/
+		Test2(); --testar adicao e remocao de clientes /*R2*/
+		Test3(); --testar passagem em sensor de highway (entrada e saida) /*R3*/
+		Test4(); --testar passagem em sensor de pagamento simples /*R3*/
+		Test5(); --testar passagem em sensor de pagamento complexo (dependente de classe do veiculo) /*R3*/
+		Test6(); --testar passagem em sensores de parque de estacionamento (entrada e saida) /*R3*/
+		Test7(); --testar emissao e pagamento de faturas /*R4+R5*/
 		
   -- Error test cases (remover o comentário 1 a 1 para testar que falham)   
-		-- Test8(); --testar remocao de protocolos que nao existem ou adicao multipla
-		-- Test9(); --testar a remocao de clientes que nao existam ou adiacao multipla
-		-- Test10(); --testar passar num par de sensores (entrada-saida) que nao existe na tabela de preços
-	  -- Test11(); --testar passar em sensores de highway violando restricoes espaço-temporais (velocidade 3)
-    -- Test12(); --testar passar em num sensor com tempo anterior
-    -- Test13(); --testar passar em num no que nao existe em nenhum serviço
-    -- Test14(); --testar passar em parque saida antes de entrada
-    -- Test15(); --testar passar em parque entrar duas vezes (entradas diferentes)
-    -- Test16();--testar entrar num parque e passar na autoestrada a meio
-    -- Test17(); --testar passar ao mesmo tempo em 2 nos
+		-- Test8(); --testar remocao de protocolos que nao existem ou adicao multipla /*R1*/
+		-- Test9(); --testar a remocao de clientes que nao existam ou adicao multipla /*R2*/
+		-- Test10(); --testar passar num par de sensores (entrada-saida) que nao existe na tabela de preços /*R3*/
+	  -- Test11(); --testar passar em sensores de highway violando restricoes espaço-temporais (velocidade 3) /*R3*/
+    -- Test12(); --testar passar em num sensor com tempo anterior /*R3*/
+    -- Test13(); --testar passar em num no que nao existe em nenhum serviço /*R3*/
+    -- Test14(); --testar passar em parque saida antes de entrada /*R3*/
+    -- Test15(); --testar passar em parque entrar duas vezes (entradas diferentes) /*R3*/
+    -- Test16();--testar entrar num parque e passar na autoestrada a meio /*R3*/
+    -- Test17(); --testar passar ao mesmo tempo em 2 nos /*R3*/
+    -- Test18(); --testar pagar fatura que nao foi emitida /*R5*/
   );
   
 
@@ -214,6 +214,7 @@ operations
   	viaVerde.addServiceProvider(brisa);
   	viaVerde.passa(c1, entrada_parque, new Time(10));
   	viaVerde.passa(c1, saida_parque, new Time(15));
+   	viaVerde.passa(c1, entrada_parque, new Time(18));
    	
    	assertEqual(0, viaVerde.records(c1)(1).cost);
    	--unidades de tempo * preço por unidade de tempo
@@ -253,8 +254,8 @@ operations
    	assertEqual(5*1.5, viaVerde.invoices(c1)(1).price);
    	assertEqual(false, viaVerde.invoices(c1)(1).paid);
    	
-   	--month comeca em 1 por defeito
-   	viaVerde.payInvoice(c1, 1);
+   	--month comeca em 1 e ano em 2014 por defeito
+   	viaVerde.payInvoice(c1, 1, 2014);
   	
   	assertTrue(viaVerde.invoices(c1)(1).paid);
   );
@@ -580,5 +581,23 @@ operations
   	viaVerde.passa(c1, s2, new Time(10));
   	
    	
+  );
+  
+  --testar pagar fatura que nao foi emitida
+  public static Test18 : () ==> ()
+  Test18() ==
+  (
+  	dcl viaVerde : ViaVerde;
+  	dcl c1: Client;
+  	
+  	viaVerde := new ViaVerde();
+  	c1 := new Client(<C1>, "francisco", 281923918);
+  	viaVerde.addClient(c1);
+  	
+   	--faturas sao emitidas
+   	viaVerde.incrementMonth();
+   	   	
+   	--month comeca em 1 e ano em 2014 por defeito, logo a fatura de 5-2015 nao foi emitida
+   	viaVerde.payInvoice(c1, 5, 2015);  	
   );
 end Tests
